@@ -28,4 +28,17 @@ describe "Reader" do
     graph["G"]["E"].should == 6
   end
 
+  it "reads table files" do
+    routes = Reader.read_table_file("table.sample")
+
+    dest_E = routes["E"]
+    dest_E.dest.should == "E"
+    dest_E.path_cost.should == 6
+    dest_E.path == []
+
+    dest_B = routes["B"]
+    dest_B.dest.should == "B"
+    dest_B.path_cost.should == 8
+    dest_B.path == ["F", "E"]
+  end
 end
