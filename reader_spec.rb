@@ -29,7 +29,7 @@ describe "Reader" do
   end
 
   it "reads table files" do
-    routes = Reader.read_table_file("table.sample")
+    routes = Reader.read_table_file("sample")
 
     dest_E = routes["5"]
     dest_E.dest.should == "5"
