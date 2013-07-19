@@ -49,12 +49,13 @@ describe Node do
 
     it "writes its own table file" do
       @node.compute_routes
-      @node.name = "XXX"
       @node.write_table_file
 
-      file = File.open("table.XXX")
+      file = File.open("table.4")
       file.should_not be_nil
-      file.lines.to_a.size.should == 3
+      file.lines.to_a.size.should == 4
+
+      file.lines.each { |l| puts l }
       file.close
     end
   end
