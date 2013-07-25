@@ -3,7 +3,7 @@ require "writer.rb"
 require "route.rb"
 
 class Node
-  attr_accessor :name, :graph, :neibours, :routes, :neibour_routes
+  attr_accessor :name, :graph, :neighbours, :routes, :neighbour_routes
 
   def initialize(name)
     @name = name
@@ -11,81 +11,63 @@ class Node
 
   def read_edge_file(file_name="edges")
     @graph = Reader.read_edge_file(file_name)
-    @neibours = @graph[@name]
+    @neighbours = @graph[@name]
+
+    if @neighbours.nil?
+      puts "Calling pvr on a node that does not exist in the edge file. Exiting..."
+      exit(-1)
+    end
   end
 
-  def read_neibours_table_files
-    @neibour_routes = Hash.new
+  def read_neighbours_table_files
+    @neighbour_routes = Hash.new
 
-    @neibours.each_pair do |neibour, _|
-      @neibour_routes[neibour] = Reader.read_table_file(neibour)
+    @neighbours.each_pair do |neighbour, _|
+      @neighbour_routes[neighbour] = Reader.read_table_file(neighbour)
     end
-
-    # puts @neibour_routes.inspect
-    # puts "@@@@@@@@@@@@@@@@@@@@@@"
   end
 
   def compute_routes
     @routes = Hash.new
 
-    @neibours.each_pair do |neibour, _|
-      cost_to_neibour = @graph[@name][neibour]
-      @routes[neibour] ||= Route.new(neibour, cost_to_neibour, [])
+    @neighbours.each_pair do |neighbour, _|
+      cost_to_neighbour = @graph[@name][neighbour]
+      @routes[neighbour] ||= Route.new(neighbour, cost_to_neighbour, [])
     end
 
-    @neibours.each_pair do |neibour, _|
-      @neibour_routes[neibour].values.each do |r|
-        next if r.path.include?(@name) || r.dest == @name
-        relax(neibour, r)
+    @neighbours.each_pair do |neighbour, _|
+      @neighbour_routes[neighbour].values.each do |r|
+        next if r.dest == @name
+        relax(neighbour, r)
       end
     end
-
-    # puts @routes.inspect
   end
 
-  def relax(neibour, route)
+  def relax(neighbour, route)
     dest = route.dest
-    neibour_cost_to_dest = route.path_cost
-    cost_to_neibour = @neibours[neibour]
-
-    puts "********************************"
-    puts "neibour #{neibour}, dest #{dest}"
-    puts "neibour_cost_to_dest #{neibour_cost_to_dest}, neibour_path_to_dest #{route.path.inspect}, cost_to_neibour #{cost_to_neibour}"
-    puts "#{@routes[dest].inspect}"
+    neighbour_cost_to_dest = route.path_cost
+    cost_to_neighbour = @neighbours[neighbour]
 
     if @routes[dest].nil? ||
-        (neibour_cost_to_dest + cost_to_neibour) < @routes[dest].path_cost
+        (neighbour_cost_to_dest + cost_to_neighbour) < @routes[dest].path_cost
 
-      cost = neibour_cost_to_dest + cost_to_neibour
-      path = [neibour] + route.path
+      cost = neighbour_cost_to_dest + cost_to_neighbour
+      path = [neighbour] + route.path
 
       @routes[dest] = Route.new(dest, cost, path)
-
-      # puts @routes[dest].inspect
-      # puts "XXX"
-      # puts @routes.inspect
-      # puts "YYY"
     end
-
-    # puts "ZZZ"
-    puts @routes.inspect
   end
 
   def write_table_file
     routes_to_writes = []
-    sorted_routes = @routes.sort { |a, b| a[1].dest <=> b[1].dest }
+    sorted_routes = @routes.sort_by { |r| r[1].dest }
 
-    # puts @routes.inspect
-    # puts sorted_routes.inspect
-
-    sorted_routes.each do |neibour, route|
-      path = ""
-      route.path.each { |n| path = path + "#{n} "}
+    sorted_routes.each do |neighbour, route|
+      path = route.path.map { |p| "#{p} "}.join.strip
 
       routes_to_writes << "#{route.dest} #{route.path_cost} #{path.rstrip}"
     end
 
     Writer.write_table_file(@name, routes_to_writes)
   end
-
 end

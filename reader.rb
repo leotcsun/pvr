@@ -18,6 +18,9 @@ module Reader
         graph[node2] ||= Hash.new
         graph[node2][node1] = cost.to_i
       end
+    rescue
+      puts "Error Reading Edge File"
+      exit(-1)
     ensure
       return graph
     end
@@ -38,6 +41,9 @@ module Reader
         route = Route.new(dest, path_cost, path)
         routes[dest] = route
       end
+    rescue
+      puts "Error Reading Table File #{node_id}"
+      exit(-1)
     ensure
       return routes
     end
