@@ -6,5 +6,5 @@ random_max = ARGV[1].to_i
 repeat_times.times do
   id = rand(random_max) + 1
   puts "calling pvr on #{id}"
-  `ruby pvr.rb #{id}`
+  puts `ruby pvr.rb #{id}`
 end

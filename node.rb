@@ -37,7 +37,7 @@ class Node
 
     @neighbours.each_pair do |neighbour, _|
       @neighbour_routes[neighbour].values.each do |r|
-        next if r.dest == @name
+        next if r.dest == @name || r.path.include?(@name)
         relax(neighbour, r)
       end
     end

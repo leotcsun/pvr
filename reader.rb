@@ -21,9 +21,9 @@ module Reader
     rescue
       puts "Error Reading Edge File"
       exit(-1)
-    ensure
-      return graph
     end
+
+    return graph
   end
 
   def Reader.read_table_file(node_id)
@@ -41,9 +41,6 @@ module Reader
         route = Route.new(dest, path_cost, path)
         routes[dest] = route
       end
-    rescue
-      puts "Error Reading Table File #{node_id}"
-      exit(-1)
     ensure
       return routes
     end
